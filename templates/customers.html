@@ -1,0 +1,59 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DukaanSathi - Customers</title>
+</head>
+<body>
+
+    <h1>Customer Management</h1>
+
+    <a href="/dashboard">Dashboard</a> |
+    <a href="/inventory">Inventory</a>
+
+    {% with messages = get_flashed_messages() %}
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    {% endwith %}
+
+    <h2>Add Customer</h2>
+
+    <form method="POST">
+
+        <input name="name"
+               placeholder="Customer name" required>
+
+        <input name="phone"
+               placeholder="Phone number">
+
+        <button type="submit">Add Customer</button>
+
+    </form>
+
+    <h2>Customer List</h2>
+
+    <table border="1" cellpadding="10">
+
+        <tr>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Outstanding Balance</th>
+        </tr>
+
+        {% for customer in customers %}
+        <tr>
+            <td>{{ customer.name }}</td>
+            <td>{{ customer.phone or "-" }}</td>
+            <td>₹{{ customer.outstanding_balance }}</td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="3">No customers added yet.</td>
+        </tr>
+        {% endfor %}
+
+    </table>
+
+</body>
+</html>

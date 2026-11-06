@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DukaanSathi - Employees</title>
+</head>
+<body>
+
+    <h1>Employee Management</h1>
+
+    <p>Manage employees authorised to use your shop assistant.</p>
+
+    <a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+
+    {% with messages = get_flashed_messages() %}
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    {% endwith %}
+
+    <hr>
+
+    <h2>Add New Employee</h2>
+
+    <form method="POST" action="{{ url_for('employees.add_employee') }}">
+
+        <input
+            type="text"
+            name="username"
+            placeholder="Employee Name"
+            required
+        >
+
+        <input
+            type="email"
+            name="email"
+            placeholder="Employee Email"
+            required
+        >
+
+        <input
+            type="password"
+            name="password"
+            placeholder="Temporary Password (minimum 8 characters)"
+            minlength="8"
+            required
+        >
+
+        <button type="submit">Add Employee</button>
+
+    </form>
+
+    <hr>
+
+    <h2>Your Employees</h2>
+
+    {% if employees %}
+
+        <table border="1" cellpadding="10">
+
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+
+            {% for employee in employees %}
+
+                <tr>
+                    <td>{{ employee.username }}</td>
+                    <td>{{ employee.email }}</td>
+
+                    <td>
+                        {% if employee.is_active %}
+                            Active
+                        {% else %}
+                            Inactive
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        <form
+                            method="POST"
+                            action="{{ url_for(
+                                'employees.toggle_employee',
+                                employee_id=employee.id
+                            ) }}"
+                        >
+
+                            {% if employee.is_active %}
+                                <button type="submit">Deactivate</button>
+                            {% else %}
+                                <button type="submit">Activate</button>
+                            {% endif %}
+
+                        </form>
+                    </td>
+                </tr>
+
+            {% endfor %}
+
+        </table>
+
+    {% else %}
+
+        <p>No employees added yet.</p>
+
+    {% endif %}
+
+</body>
+</html>

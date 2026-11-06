@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DukaanSathi - Login</title>
+</head>
+<body>
+
+    <h1>Welcome Back</h1>
+
+    {% with messages = get_flashed_messages() %}
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    {% endwith %}
+
+    <form method="POST">
+
+        <input type="email" name="email"
+               placeholder="Email" required>
+
+        <input type="password" name="password"
+               placeholder="Password" required>
+
+        <button type="submit">Login</button>
+
+    </form>
+
+</body>
+</html>

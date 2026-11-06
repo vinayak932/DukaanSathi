@@ -1,0 +1,62 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DukaanSathi - Inventory</title>
+</head>
+<body>
+
+    <h1>Shop Inventory</h1>
+
+    <a href="/dashboard">Dashboard</a> |
+    <a href="/customers">Customers</a>
+
+    {% with messages = get_flashed_messages() %}
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    {% endwith %}
+
+    <h2>Add Product</h2>
+
+    <form method="POST">
+
+        <input name="name" placeholder="Product name" required>
+
+        <input name="price" type="number"
+               step="0.01" min="0"
+               placeholder="Price (₹)" required>
+
+        <input name="stock" type="number"
+               min="0" placeholder="Stock quantity" required>
+
+        <button type="submit">Add Product</button>
+
+    </form>
+
+    <h2>Available Products</h2>
+
+    <table border="1" cellpadding="10">
+
+        <tr>
+            <th>Product</th>
+            <th>Price</th>
+            <th>Stock</th>
+        </tr>
+
+        {% for product in products %}
+        <tr>
+            <td>{{ product.name }}</td>
+            <td>₹{{ product.price }}</td>
+            <td>{{ product.stock_quantity }}</td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="3">No products added yet.</td>
+        </tr>
+        {% endfor %}
+
+    </table>
+
+</body>
+</html>
