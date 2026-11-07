@@ -39,6 +39,7 @@ class Product(db.Model):
     name = db.Column(db.String(100), nullable=False)
     price = db.Column(db.Numeric(10, 2), nullable=False)
     unit = db.Column(db.String(20), nullable=False)
+    cost_price = db.Column(db.Numeric(10, 2), nullable=True)
     stock_quantity = db.Column(db.Numeric(12, 3),nullable=False,default=0)
     low_stock_threshold = db.Column(db.Numeric(12, 3),nullable=True)
     packs = db.relationship("ProductPack",backref="product",lazy=True,cascade="all, delete-orphan")
@@ -63,4 +64,30 @@ class Customer(db.Model):
     outstanding_balance = db.Column(db.Numeric(10,2), default = 0)
     shop_id = db.Column(db.Integer, db.ForeignKey("shop.id"), nullable = False)
     created_at = db.Column(db.DateTime, default = datetime.utcnow)
+
+
+class Sale(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    shop_id = db.Column(db.Integer,db.ForeignKey("shop.id"),nullable=False)
+    customer_id = db.Column(db.Integer,db.ForeignKey("customer.id"),nullable=True)
+    total_amount = db.Column(db.Numeric(12, 2),nullable=False)
+    paid_amount = db.Column(db.Numeric(12, 2),nullable=False,default=0)
+    payment_method = db.Column(db.String(20),nullable=False)
+    created_at = db.Column(db.DateTime,default=datetime.utcnow)
+    items = db.relationship("SaleItem",backref="sale",lazy=True,cascade="all, delete-orphan")
+
+class SaleItem(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+    sale_id = db.Column(db.Integer,db.ForeignKey("sale.id"),nullable=False)
+    product_id = db.Column(db.Integer,db.ForeignKey("product.id"),nullable=False)
+    product_name = db.Column(db.String(100),nullable=False)
+    quantity = db.Column(db.Numeric(12, 3),nullable=False)
+    unit = db.Column(db.String(20),nullable=False)
+    unit_price = db.Column(db.Numeric(10, 2),nullable=False)
+    line_total = db.Column(db.Numeric(12, 2),nullable=False)
+    pack_name = db.Column(db.String(100),nullable=True)
+
 

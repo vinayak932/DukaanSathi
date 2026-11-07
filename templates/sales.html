@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DukaanSathi - Record Sale</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 550px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 11px;
+            margin: 8px 0 18px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 13px;
+            background: #1769aa;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+
+        .flash {
+            padding: 10px;
+            background: #fff2cc;
+            margin-bottom: 12px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <h2>Record a Sale</h2>
+
+    {% with messages = get_flashed_messages() %}
+    {% for message in messages %}
+    <div class="flash">{{ message }}</div>
+    {% endfor %}
+    {% endwith %}
+
+    {% if not products %}
+    <p>Add products to your inventory before recording sales.</p>
+    {% else %}
+
+    <form method="POST" action="{{ url_for('shop_data.record_sale') }}">
+
+        <label>Product</label>
+        <select name="product_id" id="product" required>
+            {% for product in products %}
+            <option value="{{ product.id }}">
+                {{ product.name }} ({{ product.stock_quantity }} {{ product.unit }})
+            </option>
+            {% endfor %}
+        </select>
+
+        <label>Sale type</label>
+        <select id="sale_type">
+            <option value="quantity">By quantity</option>
+            <option value="amount">By amount</option>
+            <option value="pack">By pack</option>
+        </select>
+
+        <div id="quantity_box">
+            <label id="quantity_label">Quantity</label>
+            <input
+                    type="number"
+                    name="quantity"
+                    id="quantity"
+                    min="0.001"
+                    step="0.001"
+                    placeholder="Enter quantity"
+            >
+        </div>
+
+        <div id="amount_box" class="hidden">
+            <label>Total amount (₹)</label>
+            <input
+                    type="number"
+                    name="amount"
+                    id="amount"
+                    min="0.01"
+                    step="0.01"
+                    placeholder="Enter amount"
+                    disabled
+            >
+        </div>
+
+        <div id="pack_box" class="hidden">
+            <label>Select pack</label>
+            <select name="pack_id" id="pack_id" disabled>
+                <option value="">Choose a pack</option>
+                {% for pack in packs %}
+                <option
+                        value="{{ pack.id }}"
+                        data-product="{{ pack.product_id }}"
+                >
+                    {{ pack.product.name }} - {{ pack.pack_name }}
+                    (₹{{ pack.price }})
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+
+        <label>Customer (optional)</label>
+
+        <select name="customer_id" id="customer_select">
+            <option value="">Walk-in / Unknown customer</option>
+
+            {% for customer in customers %}
+            <option value="{{ customer.id }}">
+                {{ customer.name }}
+            </option>
+            {% endfor %}
+
+            <option value="new">+ Add a new customer</option>
+        </select>
+
+        <div id="new_customer_box" class="hidden">
+            <label>Customer name</label>
+            <input
+                    type="text"
+                    name="new_customer_name"
+                    id="new_customer_name"
+                    placeholder="Enter customer name"
+                    disabled
+            >
+
+            <label>Phone number (optional)</label>
+            <input
+                    type="text"
+                    name="new_customer_phone"
+                    id="new_customer_phone"
+                    placeholder="Enter phone number"
+                    disabled
+            >
+        </div>
+
+
+        <label>Payment method</label>
+        <select name="payment_method" required>
+            <option value="cash">Cash</option>
+            <option value="upi">UPI</option>
+            <option value="udhaar">Udhaar</option>
+        </select>
+
+        <button type="submit">Record Sale</button>
+
+    </form>
+
+    {% endif %}
+
+    <p><a href="{{ url_for('shop_data.inventory') }}">Back to Inventory</a></p>
+    <p><a href="{{ url_for('shop_data.customers') }}">Customers</a></p>
+
+</div>
+
+<script>
+    const saleType = document.getElementById("sale_type");
+    const quantity = document.getElementById("quantity");
+    const amount = document.getElementById("amount");
+    const packId = document.getElementById("pack_id");
+
+    const product = document.getElementById("product");
+    const quantityBox = document.getElementById("quantity_box");
+    const amountBox = document.getElementById("amount_box");
+    const packBox = document.getElementById("pack_box");
+
+    const customerSelect = document.getElementById("customer_select");
+    const newCustomerBox = document.getElementById("new_customer_box");
+    const newCustomerName = document.getElementById("new_customer_name");
+    const newCustomerPhone = document.getElementById("new_customer_phone");
+
+    function updateSaleForm() {
+        const type = saleType.value;
+
+        quantityBox.classList.toggle("hidden", type === "amount");
+        amountBox.classList.toggle("hidden", type !== "amount");
+        packBox.classList.toggle("hidden", type !== "pack");
+
+        quantity.disabled = type === "amount";
+        amount.disabled = type !== "amount";
+        packId.disabled = type !== "pack";
+
+        quantity.required = type !== "amount";
+        amount.required = type === "amount";
+        packId.required = type === "pack";
+
+        document.getElementById("quantity_label").textContent =
+            type === "pack" ? "Number of packs" : "Quantity";
+    }
+
+    function filterPacks() {
+        const selectedProduct = product.value;
+
+        for (const option of packId.options) {
+            if (!option.value) continue;
+
+            option.hidden =
+                option.dataset.product !== selectedProduct;
+
+            if (option.hidden && option.selected) {
+                packId.value = "";
+            }
+        }
+    }
+
+    saleType.addEventListener("change", updateSaleForm);
+    product.addEventListener("change", filterPacks);
+
+    updateSaleForm();
+    filterPacks();
+
+    function updateCustomerForm() {
+       const isNew = customerSelect.value === "new";
+
+       newCustomerBox.classList.toggle("hidden", !isNew);
+
+       newCustomerName.disabled = !isNew;
+       newCustomerPhone.disabled = !isNew;
+
+       newCustomerName.required = isNew;
+    }
+
+    customerSelect.addEventListener("change", updateCustomerForm);
+    updateCustomerForm();
+
+</script>
+
+</body>
+</html>
