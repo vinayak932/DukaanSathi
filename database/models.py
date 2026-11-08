@@ -1,3 +1,5 @@
+from email.policy import default
+
 from flask_migrate import Migrate
 
 from database.db import db
@@ -42,6 +44,7 @@ class Product(db.Model):
     cost_price = db.Column(db.Numeric(10, 2), nullable=True)
     stock_quantity = db.Column(db.Numeric(12, 3),nullable=False,default=0)
     low_stock_threshold = db.Column(db.Numeric(12, 3),nullable=True)
+    aliases = db.relationship("ProductAlias",backref="product",lazy=True,cascade="all, delete-orphan")
     packs = db.relationship("ProductPack",backref="product",lazy=True,cascade="all, delete-orphan")
     shop_id = db.Column(db.Integer,db.ForeignKey("shop.id"),nullable=False)
     created_at = db.Column(db.DateTime,default=datetime.utcnow)
@@ -90,4 +93,21 @@ class SaleItem(db.Model):
     line_total = db.Column(db.Numeric(12, 2),nullable=False)
     pack_name = db.Column(db.String(100),nullable=True)
 
+class ProductAlias(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    product_id = db.Column(db.Integer,db.ForeignKey("product.id"),nullable=False)
+    alias = db.Column(db.String(100), nullable=False)
+    created_at = db.Column(db.DateTime,default=datetime.utcnow)
+
+class ConversationState(db.Model):
+
+    id = db.Column(db.Integer,primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable = False, index = True)
+    shop_id = db.Column(db.Integer, db.ForeignKey("shop.id"), nullable = False, index = True)
+    state_data = db.Column(db.JSON,nullable=False)
+    state = db.Column(db.String(25),nullable=False)
+    created_at = db.Column(db.DateTime,default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime,onupdate=datetime.utcnow,default=datetime.utcnow,nullable=False)
+    expires_at = db.Column(db.DateTime,default=datetime.utcnow,nullable=False)
 
