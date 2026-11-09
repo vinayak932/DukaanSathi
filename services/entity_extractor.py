@@ -2,7 +2,6 @@ import re
 from decimal import Decimal, InvalidOperation
 from difflib import SequenceMatcher
 
-
 UNIT_ALIASES = {
     "kg": "kg", "kilo": "kg", "kilos": "kg",
     "kilogram": "kg", "kilograms": "kg",
@@ -18,7 +17,6 @@ UNIT_ALIASES = {
     "bag": "bag", "bags": "bag"
 }
 
-
 PAYMENT_ALIASES = {
     "cash": "cash",
     "nagad": "cash",
@@ -33,7 +31,6 @@ PAYMENT_ALIASES = {
     "उधार": "udhaar",
     "credit": "udhaar"
 }
-
 
 # Common spoken Hindi-English product equivalents.
 WORD_SYNONYMS = {
@@ -61,15 +58,22 @@ WORD_SYNONYMS = {
     "दूध": "milk"
 }
 
-
 FUZZY_THRESHOLD = 0.86
 FUZZY_MIN_MARGIN = 0.08
 
 
 def normalize(text):
     text = str(text).lower().strip()
-    text = re.sub(r"[^\w\s.-]", " ", text, flags=re.UNICODE)
-    return re.sub(r"\s+", " ", text)
+
+    # Preserve Devanagari characters and their combining marks.
+    text = re.sub(
+        r"[^\w\s.\-\u0900-\u097F]",
+        " ",
+        text,
+        flags=re.UNICODE
+    )
+
+    return re.sub(r"\s+", " ", text).strip()
 
 
 def normalize_product_phrase(text):
@@ -199,81 +203,86 @@ def _generic_product_variants(selected, products, normalized_text):
 
 
 def find_product_match(text, products):
-    """
-    Returns one of three statuses:
+    normalized_text = normalize_product_phrase(text).strip()
 
-    FOUND      - Product identified.
-    AMBIGUOUS  - Multiple possible products.
-    NOT_FOUND  - No matching product.
-    """
+    if not normalized_text:
+        return {
+            "status": "NOT_FOUND",
+            "product": None,
+            "candidates": [],
+            "match_type": None
+        }
 
-    normalized_text = normalize_product_phrase(text)
+    exact_matches = []
+    generic_matches = []
 
-    candidates = []
-
-    # First: exact product name and alias matching.
+    # First: match product names and aliases.
     for product in products:
+        for name in _product_names(product):
+            normalized_name = normalize_product_phrase(name).strip()
 
-        matched_lengths = [
-            len(normalize_product_phrase(name))
-            for name in _product_names(product)
-            if _contains_phrase(normalized_text, name)
-        ]
+            if not normalized_name:
+                continue
 
-        if matched_lengths:
-            candidates.append(
-                (product, max(matched_lengths))
-            )
+            # Full database product name appears in spoken phrase.
+            if _contains_phrase(normalized_text, normalized_name):
+                exact_matches.append((product, len(normalized_name)))
 
-    if candidates:
+            # Spoken generic phrase appears inside database name.
+            elif _contains_phrase(normalized_name, normalized_text):
+                generic_matches.append(product)
 
-        best_length = max(
-            length for _, length in candidates
-        )
+    # Prefer the most specific full product-name match.
+    if exact_matches:
+        best_length = max(length for _, length in exact_matches)
 
-        best_products = [
-            product
-            for product, length in candidates
-            if length == best_length
-        ]
+        best_products = list({
+                                 product.id: product
+                                 for product, length in exact_matches
+                                 if length == best_length
+                             }.values())
 
-        if len(best_products) > 1:
+        if len(best_products) == 1:
             return {
-                "status": "AMBIGUOUS",
-                "product": None,
+                "status": "FOUND",
+                "product": best_products[0],
                 "candidates": best_products,
                 "match_type": "exact"
             }
 
-        selected = best_products[0]
+        return {
+            "status": "AMBIGUOUS",
+            "product": None,
+            "candidates": best_products,
+            "match_type": "exact"
+        }
 
-        # Check whether a generic product has specific variants.
-        variants = _generic_product_variants(
-            selected,
-            products,
-            normalized_text
-        )
+    # Generic phrase such as "rice" can match multiple varieties.
+    if generic_matches:
+        unique_products = list({
+                                   product.id: product
+                                   for product in generic_matches
+                               }.values())
 
-        if variants:
+        if len(unique_products) == 1:
             return {
-                "status": "AMBIGUOUS",
-                "product": None,
-                "candidates": variants,
+                "status": "FOUND",
+                "product": unique_products[0],
+                "candidates": unique_products,
                 "match_type": "generic"
             }
 
         return {
-            "status": "FOUND",
-            "product": selected,
-            "candidates": [selected],
-            "match_type": "exact"
+            "status": "AMBIGUOUS",
+            "product": None,
+            "candidates": unique_products,
+            "match_type": "generic"
         }
 
-    # Second: conservative fuzzy matching.
+    # Finally: retain the existing conservative fuzzy matching.
     fuzzy_candidates = []
 
     for product in products:
-
         score = max(
             (
                 _fuzzy_score(text, name)
@@ -283,9 +292,7 @@ def find_product_match(text, products):
         )
 
         if score >= FUZZY_THRESHOLD:
-            fuzzy_candidates.append(
-                (product, score)
-            )
+            fuzzy_candidates.append((product, score))
 
     fuzzy_candidates.sort(
         key=lambda item: item[1],
@@ -300,13 +307,11 @@ def find_product_match(text, products):
             "match_type": None
         }
 
-    # If two products have similar scores, don't guess.
     if (
-        len(fuzzy_candidates) > 1
-        and fuzzy_candidates[0][1] - fuzzy_candidates[1][1]
-        < FUZZY_MIN_MARGIN
+            len(fuzzy_candidates) > 1
+            and fuzzy_candidates[0][1] - fuzzy_candidates[1][1]
+            < FUZZY_MIN_MARGIN
     ):
-
         close_matches = [
             product
             for product, score in fuzzy_candidates
@@ -321,20 +326,6 @@ def find_product_match(text, products):
         }
 
     selected = fuzzy_candidates[0][0]
-
-    variants = _generic_product_variants(
-        selected,
-        products,
-        normalized_text
-    )
-
-    if variants:
-        return {
-            "status": "AMBIGUOUS",
-            "product": None,
-            "candidates": variants,
-            "match_type": "generic"
-        }
 
     return {
         "status": "FOUND",
@@ -359,8 +350,8 @@ def find_customer(text, customers):
         customer_name = normalize(customer.name)
 
         if customer_name and re.search(
-            rf"(?<!\w){re.escape(customer_name)}(?!\w)",
-            normalized_text
+                rf"(?<!\w){re.escape(customer_name)}(?!\w)",
+                normalized_text
         ):
             matches.append(customer)
 
@@ -373,9 +364,9 @@ def find_customer(text, customers):
     )
 
     if (
-        len(matches) > 1
-        and len(normalize(matches[0].name))
-        == len(normalize(matches[1].name))
+            len(matches) > 1
+            and len(normalize(matches[0].name))
+            == len(normalize(matches[1].name))
     ):
         return None
 
@@ -388,8 +379,8 @@ def extract_payment_method(text):
     for phrase, method in PAYMENT_ALIASES.items():
 
         if re.search(
-            rf"(?<!\w){re.escape(phrase)}(?!\w)",
-            normalized_text
+                rf"(?<!\w){re.escape(phrase)}(?!\w)",
+                normalized_text
         ):
             return method
 

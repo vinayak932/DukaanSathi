@@ -1,12 +1,8 @@
-
 from datetime import datetime, timedelta
-
 from database.db import db
 from database.models import ConversationState
 
-
 CONVERSATION_TIMEOUT_MINUTES = 15
-
 
 def get_active_conversation(user_id, shop_id):
     """
@@ -19,7 +15,7 @@ def get_active_conversation(user_id, shop_id):
         .filter_by(
             user_id=user_id,
             shop_id=shop_id,
-            status="active"
+            state="active"
         )
         .order_by(ConversationState.updated_at.desc())
         .first()
@@ -31,7 +27,7 @@ def get_active_conversation(user_id, shop_id):
     now = datetime.utcnow()
 
     if conversation.expires_at <= now:
-        conversation.status = "expired"
+        conversation.state = "expired"
         db.session.commit()
         return None
 
@@ -53,7 +49,7 @@ def save_conversation(user_id, shop_id, state_data):
         .filter_by(
             user_id=user_id,
             shop_id=shop_id,
-            status="active"
+            state="active"
         )
         .order_by(ConversationState.updated_at.desc())
         .first()
@@ -64,7 +60,7 @@ def save_conversation(user_id, shop_id, state_data):
             user_id=user_id,
             shop_id=shop_id,
             state_data=state_data,
-            status="active",
+            state="active",
             created_at=now,
             updated_at=now,
             expires_at=now + timedelta(
@@ -99,7 +95,7 @@ def finish_conversation(user_id, shop_id, status="completed"):
         .filter_by(
             user_id=user_id,
             shop_id=shop_id,
-            status="active"
+            state="active"
         )
         .order_by(ConversationState.updated_at.desc())
         .first()
