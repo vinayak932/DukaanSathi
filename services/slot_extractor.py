@@ -1,8 +1,7 @@
 import json
 from decimal import Decimal, InvalidOperation
-
-from services.llm_service import client, MODEL
-
+from groq import BadRequestError
+from services.llm_service import get_groq_client, MODEL
 
 WORKFLOW_FIELDS = {
     "product_creation": {
@@ -28,6 +27,53 @@ WORKFLOW_FIELDS = {
 }
 
 
+def build_slot_schema(workflow):
+    fields = WORKFLOW_FIELDS[workflow]
+
+    properties = {}
+
+    for field in fields:
+        if field == "items":
+            properties[field] = {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "product": {"type": ["string", "null"]},
+                        "quantity": {"type": ["string", "null"]},
+                        "unit": {"type": ["string", "null"]}
+                    },
+                    "required": ["product", "quantity", "unit"],
+                    "additionalProperties": False
+                }
+            }
+
+        elif field == "payment_method":
+            properties[field] = {
+                "type": ["string", "null"],
+                "enum": ["cash", "upi", "udhaar", None]
+            }
+
+        else:
+            properties[field] = {
+                "type": ["string", "null"]
+            }
+
+    return {
+        "type": "object",
+        "properties": {
+            "updates": {
+                "type": "object",
+                "properties": properties,
+                "required": list(fields.keys()),
+                "additionalProperties": False
+            }
+        },
+        "required": ["updates"],
+        "additionalProperties": False
+    }
+
+
 def _validate_number(value, field_name):
     """Validate extracted numeric values without guessing."""
     if isinstance(value, bool):
@@ -45,9 +91,9 @@ def _validate_number(value, field_name):
 
 
 def extract_conversation_slots(
-    workflow,
-    reply,
-    current_state=None
+        workflow,
+        reply,
+        current_state=None
 ):
     """
     Extract every explicitly mentioned field from one reply.
@@ -97,13 +143,43 @@ RULES:
 11. If a value is unclear, omit it.
 12. Do not calculate or infer financial values.
 
-Return ONLY valid JSON in this format:
+Return ONLY valid JSON.
 
+The response MUST contain every allowed field inside "updates".
+For fields not explicitly mentioned in the latest reply, use null.
+
+For record_sale, use exactly this structure:
 {{
-    "updates": {{}}
+    "updates": {{
+        "customer": null,
+        "payment_method": null,
+        "amount": null,
+        "items": []
+    }}
 }}
-"""
 
+For product_creation, use exactly this structure:
+{{
+    "updates": {{
+        "product_name": null,
+        "unit": null,
+        "cost_price": null,
+        "selling_price": null,
+        "stock_quantity": null
+    }}
+}}
+
+For record_payment, use exactly this structure:
+{{
+    "updates": {{
+        "customer": null,
+        "amount": null
+    }}
+}}
+
+Never omit a key. Never invent a value. 
+"""
+    client = get_groq_client()
     completion = client.chat.completions.create(
         model=MODEL,
         messages=[
@@ -111,8 +187,9 @@ Return ONLY valid JSON in this format:
             {"role": "user", "content": reply},
         ],
         response_format={"type": "json_object"},
+        reasoning_effort="low",
         temperature=0.1,
-        max_completion_tokens=600,
+        max_completion_tokens=2048
     )
 
     content = completion.choices[0].message.content
@@ -176,7 +253,7 @@ Return ONLY valid JSON in this format:
                     raise ValueError("Invalid sale item.")
 
                 if not set(item).issubset(
-                    {"product", "quantity", "unit"}
+                        {"product", "quantity", "unit"}
                 ):
                     raise ValueError("Unsupported sale item field.")
 

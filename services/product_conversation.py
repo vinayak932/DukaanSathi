@@ -176,18 +176,6 @@ def process_product_reply(reply, pending):
             "response": "Kripya dobara bataiye."
         }
 
-    cancel_words = {
-        "cancel", "cancel karo", "rehne do",
-        "nahi", "radd karo", "radd kar do"
-    }
-
-    if answer.lower() in cancel_words:
-        return {
-            "status": "CANCELLED",
-            "pending": None,
-            "response": "Theek hai, product add karna cancel kar diya."
-        }
-
     product = pending["new_product"]
 
     # Extract every field mentioned in the latest reply.

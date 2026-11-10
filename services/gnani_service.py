@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from gnani.stt import GnaniSTTClient
 import subprocess
 import tempfile
+from gnani.tts import GnaniTTSClient, AudioConfig
 
 # Load environment variables
 load_dotenv()
@@ -66,3 +67,28 @@ def transcribe_audio(audio_path, language_code="hi-IN"):
     finally:
         if wav_path.exists():
             wav_path.unlink()
+
+def synthesize_speech(text):
+    if not text or not text.strip():
+        raise ValueError("Text cannot be empty.")
+
+    api_key = os.getenv("GNANI_API_KEY")
+    if not api_key:
+        raise ValueError("GNANI_API_KEY is missing.")
+
+    client = GnaniTTSClient(api_key=api_key)
+
+    audio = client.synthesize(
+        text.strip(),
+        voice="Nalini",
+        model="timbre-v2.5",
+        language="hi-IN",
+        speed=1.0,
+        audio_config=AudioConfig(
+            container="wav",
+            sample_rate=48000,
+            bitrate=None
+        )
+    )
+
+    return audio

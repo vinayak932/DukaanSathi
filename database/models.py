@@ -111,3 +111,11 @@ class ConversationState(db.Model):
     updated_at = db.Column(db.DateTime,onupdate=datetime.utcnow,default=datetime.utcnow,nullable=False)
     expires_at = db.Column(db.DateTime,default=datetime.utcnow,nullable=False)
 
+class CustomerPayment(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+    customer_id = db.Column(db.Integer,db.ForeignKey("customer.id"),nullable=False)
+    shop_id = db.Column(db.Integer,db.ForeignKey("shop.id"),nullable=False)
+    amount = db.Column(db.Numeric(10, 2),nullable=False)
+    payment_method = db.Column(db.String(20),nullable=False)
+    created_at = db.Column(db.DateTime,default=datetime.utcnow,nullable=False)

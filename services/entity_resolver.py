@@ -1,12 +1,6 @@
-
 from decimal import Decimal, InvalidOperation
-
-from services.entity_extractor import (
-    find_product_match,
-    find_customer,
-    extract_payment_method,
-)
-
+from services.llm_product_resolver import resolve_product_with_llm
+from services.entity_extractor import find_product_match, find_customer, extract_payment_method
 
 # Hindi and Hinglish unit names mapped to database units.
 UNIT_ALIASES_HI = {
@@ -81,14 +75,44 @@ def resolve_product_item(raw_item, products):
         raw_item = {}
 
     product_name = raw_item.get("product")
+    print("\n========== PRODUCT DEBUG ==========")
+    print("Spoken product:", product_name)
+
+    print("Available products:")
+    for p in products:
+        print(f"ID: {p.id} | Name: {p.name}")
+
+    print("Local matching result:")
+    debug_match = find_product_match(str(product_name), products)
+    print(debug_match["status"])
+    print(
+        debug_match["product"].name
+        if debug_match["product"] else None
+    )
+    print("===================================\n")
 
     if product_name:
-        product_match = find_product_match(str(product_name), products)
+        product_match = find_product_match(
+            str(product_name),
+            products
+        )
 
         product_status = product_match["status"]
         product = product_match.get("product")
         product_candidates = product_match.get("candidates", [])
         product_match_type = product_match.get("match_type")
+
+        if product_status == "NOT_FOUND":
+            llm_product = resolve_product_with_llm(
+                str(product_name),
+                products
+            )
+
+            if llm_product:
+                product = llm_product
+                product_status = "FOUND"
+                product_candidates = [llm_product]
+                product_match_type = "llm"
     else:
         product_status = "NOT_PROVIDED"
         product = None
@@ -204,6 +228,12 @@ def resolve_llm_entities(nlu_result, products, customers):
         # Customer
         "customer": customer,
         "customer_status": customer_status,
+        # Preserve the spoken name when it is not in this shop's database.
+        # start_sale_conversation() uses this to ask before creating a customer.
+        "customer_name": (
+            str(customer_name).strip()
+            if customer_name and customer is None else None
+        ),
 
         # Payment
         "amount": amount,

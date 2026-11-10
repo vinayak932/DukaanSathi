@@ -1,8 +1,12 @@
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from database.db import db
-from database.models import Product, Customer, Sale, SaleItem
+from database.models import Product, Customer, Sale, SaleItem, CustomerPayment
+from datetime import datetime, time, timezone
+from zoneinfo import ZoneInfo
+from sqlalchemy import func
 
 MONEY_PLACES = Decimal("0.01")
+
 
 def record_confirmed_sale(user_id, shop_id, pending):
     """
@@ -84,7 +88,7 @@ def record_confirmed_sale(user_id, shop_id, pending):
             unit_price = Decimal(str(product.price))
 
             line_total = (
-                quantity * unit_price
+                    quantity * unit_price
             ).quantize(
                 MONEY_PLACES,
                 rounding=ROUND_HALF_UP
@@ -98,8 +102,8 @@ def record_confirmed_sale(user_id, shop_id, pending):
             })
 
             required_stock[product.id] = (
-                required_stock.get(product.id, Decimal("0"))
-                + quantity
+                    required_stock.get(product.id, Decimal("0"))
+                    + quantity
             )
 
             total_amount += line_total
@@ -189,3 +193,116 @@ def record_confirmed_sale(user_id, shop_id, pending):
     except Exception:
         db.session.rollback()
         raise
+
+
+def record_customer_payment(shop_id, customer_id, amount, payment_method="cash"):
+    try:
+        amount = Decimal(str(amount)).quantize(
+            MONEY_PLACES,
+            rounding=ROUND_HALF_UP
+        )
+
+        payment_method = str(payment_method).strip().lower()
+
+        if not amount.is_finite() or amount <= 0:
+            raise ValueError("Valid repayment amount batayein.")
+
+        if payment_method not in ["cash", "upi"]:
+            raise ValueError(
+                "Repayment method cash ya UPI hona chahiye."
+            )
+
+        customer = Customer.query.filter_by(
+            id=customer_id,
+            shop_id=shop_id
+        ).with_for_update().first()
+
+        if not customer:
+            raise ValueError("Customer nahi mila.")
+
+        balance = Decimal(
+            str(customer.outstanding_balance or "0")
+        )
+
+        if balance <= 0:
+            raise ValueError(
+                "Is customer ka koi outstanding udhaar nahi hai."
+            )
+
+        if amount > balance:
+            raise ValueError(
+                f"Customer ka total udhaar ₹{balance} hai."
+            )
+
+        # Update outstanding balance.
+        customer.outstanding_balance = (
+                balance - amount
+        ).quantize(MONEY_PLACES)
+
+        # Save repayment history.
+        payment = CustomerPayment(
+            customer_id=customer.id,
+            shop_id=shop_id,
+            amount=amount,
+            payment_method=payment_method
+        )
+
+        db.session.add(payment)
+
+        # Both changes succeed or fail together.
+        db.session.commit()
+
+        return customer
+
+    except (ValueError, InvalidOperation, TypeError):
+        db.session.rollback()
+        raise
+
+    except Exception:
+        db.session.rollback()
+        raise
+
+def get_today_sales_summary(shop_id, payment_method=None):
+    india_tz = ZoneInfo("Asia/Kolkata")
+    today = datetime.now(india_tz).date()
+
+    start_local = datetime.combine(
+        today,
+        time.min,
+        tzinfo=india_tz
+    )
+
+    end_local = datetime.combine(
+        today,
+        time.max,
+        tzinfo=india_tz
+    )
+
+    start_utc = start_local.astimezone(
+        timezone.utc
+    ).replace(tzinfo=None)
+
+    end_utc = end_local.astimezone(
+        timezone.utc
+    ).replace(tzinfo=None)
+
+    query = db.session.query(
+        func.coalesce(func.sum(Sale.total_amount), 0)
+    ).filter(
+        Sale.shop_id == shop_id,
+        Sale.created_at >= start_utc,
+        Sale.created_at <= end_utc
+    )
+
+    if payment_method in ["cash", "upi", "udhaar"]:
+        query = query.filter(
+            Sale.payment_method == payment_method
+        )
+
+    result = query.scalar()
+
+    return {
+        "date": today.isoformat(),
+        "payment_method": payment_method or "total",
+        "total_sales": float(result)
+    }

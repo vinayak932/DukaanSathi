@@ -1,6 +1,7 @@
 import re
 from decimal import Decimal, InvalidOperation
 from difflib import SequenceMatcher
+import unicodedata
 
 UNIT_ALIASES = {
     "kg": "kg", "kilo": "kg", "kilos": "kg",
@@ -55,7 +56,11 @@ WORD_SYNONYMS = {
     "नमक": "salt",
 
     "doodh": "milk",
-    "दूध": "milk"
+    "दूध": "milk",
+
+    "राइस": "rice",
+    "बासमती": "basmati",
+
 }
 
 FUZZY_THRESHOLD = 0.86
@@ -63,17 +68,24 @@ FUZZY_MIN_MARGIN = 0.08
 
 
 def normalize(text):
-    text = str(text).lower().strip()
+    if text is None:
+        return ""
 
-    # Preserve Devanagari characters and their combining marks.
+    text = unicodedata.normalize("NFC", str(text))
+    text = text.lower().strip()
+
+    # Remove punctuation while preserving Hindi and English words.
     text = re.sub(
-        r"[^\w\s.\-\u0900-\u097F]",
+        r"[^\w\s\u0900-\u097F]",
         " ",
         text,
         flags=re.UNICODE
     )
 
-    return re.sub(r"\s+", " ", text).strip()
+    # Standardise whitespace.
+    text = re.sub(r"\s+", " ", text).strip()
+
+    return text
 
 
 def normalize_product_phrase(text):
@@ -204,6 +216,15 @@ def _generic_product_variants(selected, products, normalized_text):
 
 def find_product_match(text, products):
     normalized_text = normalize_product_phrase(text).strip()
+    print("NORMALIZED INPUT:", normalized_text)
+
+    for product in products:
+        print(
+            "PRODUCT:",
+            product.name,
+            "| NORMALIZED:",
+            normalize_product_phrase(product.name)
+        )
 
     if not normalized_text:
         return {
@@ -225,7 +246,14 @@ def find_product_match(text, products):
                 continue
 
             # Full database product name appears in spoken phrase.
-            if _contains_phrase(normalized_text, normalized_name):
+            # Avoid treating a shorter generic name as an exact match.
+            spoken_word_count = len(normalized_text.split())
+            product_word_count = len(normalized_name.split())
+
+            if (
+                    _contains_phrase(normalized_text, normalized_name)
+                    and product_word_count >= spoken_word_count
+            ):
                 exact_matches.append((product, len(normalized_name)))
 
             # Spoken generic phrase appears inside database name.

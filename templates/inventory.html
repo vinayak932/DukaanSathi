@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,281 +5,1155 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DukaanSathi - Inventory</title>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
     <style>
+        :root {
+            --navy: #101b2d;
+            --navy-light: #1a2940;
+            --mint: #70e0b5;
+            --mint-dark: #36bd91;
+            --bg: #f4f7f8;
+            --white: #ffffff;
+            --text: #172337;
+            --muted: #8390a2;
+            --border: #e8edf0;
+            --red: #e66b72;
+            --orange: #e8a44d;
+            --shadow: 0 8px 30px rgba(20, 35, 55, .055);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            margin: 30px;
-            background: #f7f8fa;
-            color: #222;
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
         }
 
-        h1, h2 {
-            color: #263445;
+        .app {
+            display: flex;
+            min-height: 100vh;
         }
 
-        .section {
+        /* SIDEBAR */
+
+        .sidebar {
+            width: 245px;
+            background: var(--navy);
+            color: white;
+            padding: 28px 18px;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 0 10px;
+            margin-bottom: 48px;
+        }
+
+        .brand-icon {
+            width: 39px;
+            height: 39px;
+            border-radius: 13px;
+            background: var(--mint);
+            color: var(--navy);
+            display: grid;
+            place-items: center;
+            font-size: 21px;
+            font-weight: 700;
+        }
+
+        .brand-name {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 19px;
+            font-weight: 700;
+        }
+
+        .brand-name span {
+            color: var(--mint);
+        }
+
+        .nav-label {
+            padding: 0 12px;
+            margin-bottom: 13px;
+            color: #718198;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+        }
+
+        .nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #aab6c7;
+            padding: 13px 14px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            font-size: 13px;
+            font-weight: 600;
+            transition: .2s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            background: #26364c;
+            color: var(--mint);
+        }
+
+        .nav-icon {
+            width: 20px;
+            text-align: center;
+            font-size: 17px;
+        }
+
+        .sidebar-bottom {
+            margin-top: auto;
+        }
+
+        .sidebar-tip {
+            padding: 17px;
+            border-radius: 14px;
+            background: #1b2b40;
+            margin-bottom: 20px;
+        }
+
+        .sidebar-tip strong {
+            color: var(--mint);
+            font-size: 12px;
+        }
+
+        .sidebar-tip p {
+            color: #aab6c7;
+            font-size: 11px;
+            line-height: 1.6;
+            margin-top: 7px;
+        }
+
+        .logout {
+            display: block;
+            padding: 12px;
+            color: #aab6c7;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        /* MAIN */
+
+        .main {
+            flex: 1;
+            min-width: 0;
+            padding: 34px 42px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 34px;
+        }
+
+        .breadcrumb {
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 7px;
+        }
+
+        .breadcrumb span {
+            color: var(--mint-dark);
+            font-weight: 700;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        h1 {
+            font-size: 28px;
+            letter-spacing: -.8px;
+        }
+
+        .subtitle {
+            color: var(--muted);
+            font-size: 13px;
+            margin-top: 7px;
+        }
+
+        .user-avatar {
+            width: 43px;
+            height: 43px;
+            border-radius: 14px;
+            display: grid;
+            place-items: center;
+            background: #dff8ed;
+            color: #16835f;
+            font-weight: 700;
+        }
+
+        /* FLASH MESSAGES */
+
+        .flash {
+            background: #e4f8ef;
+            border: 1px solid #c7efdc;
+            color: #187a56;
+            padding: 13px 16px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 13px;
+        }
+
+        /* SUMMARY */
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 17px;
+            margin-bottom: 25px;
+        }
+
+        .summary-card {
             background: white;
+            border: 1px solid var(--border);
+            border-radius: 15px;
             padding: 20px;
-            margin: 20px 0;
-            border-radius: 8px;
+            box-shadow: var(--shadow);
         }
 
-        input, select {
-            padding: 9px;
-            margin: 6px 4px;
+        .summary-card p {
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 600;
         }
 
-        button {
-            padding: 9px 15px;
-            background: #1769aa;
+        .summary-card h2 {
+            font-size: 26px;
+            margin-top: 10px;
+        }
+
+        .summary-card small {
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .summary-card.alert h2 {
+            color: var(--red);
+        }
+
+        /* ADD PRODUCT */
+
+        .panel {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 17px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+            margin-bottom: 25px;
+        }
+
+        .panel-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 23px;
+        }
+
+        .panel-heading h2 {
+            font-size: 18px;
+        }
+
+        .panel-heading p {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 6px;
+        }
+
+        .step-tag {
+            background: #e7f9f1;
+            color: #16835f;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 7px 11px;
+            border-radius: 20px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .field label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #526075;
+        }
+
+        .field input,
+        .field select {
+            width: 100%;
+            padding: 12px 13px;
+            border: 1px solid #e2e8ec;
+            border-radius: 9px;
+            outline: none;
+            font-family: inherit;
+            font-size: 13px;
+            background: #fbfcfd;
+            color: var(--text);
+            transition: .2s;
+        }
+
+        .field input:focus,
+        .field select:focus {
+            border-color: var(--mint-dark);
+            box-shadow: 0 0 0 3px rgba(54, 189, 145, .11);
+        }
+
+        .field input::placeholder {
+            color: #aab4c0;
+        }
+
+        .form-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 22px;
+            gap: 15px;
+        }
+
+        .form-note {
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .primary-btn {
+            background: var(--navy);
             color: white;
             border: none;
-            border-radius: 4px;
+            padding: 12px 20px;
+            border-radius: 9px;
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 700;
             cursor: pointer;
+            transition: .2s;
+        }
+
+        .primary-btn:hover {
+            background: #263d5b;
+            transform: translateY(-1px);
+        }
+
+        /* PRODUCT LIST */
+
+        .inventory-panel {
+            padding: 25px;
+        }
+
+        .inventory-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 22px;
+        }
+
+        .inventory-toolbar h2 {
+            font-size: 18px;
+        }
+
+        .inventory-toolbar p {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 6px;
+        }
+
+        .toolbar-controls {
+            display: flex;
+            gap: 9px;
+        }
+
+        .search-box input,
+        .toolbar-controls select {
+            padding: 11px 13px;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            background: #fbfcfd;
+            font-family: inherit;
+            font-size: 12px;
+            outline: none;
+        }
+
+        .search-box input {
+            width: 210px;
+        }
+
+        .search-box input:focus,
+        .toolbar-controls select:focus {
+            border-color: var(--mint-dark);
+        }
+
+        .table-wrap {
+            overflow-x: auto;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            background: white;
-        }
-
-        th, td {
-            padding: 12px;
-            border: 1px solid #ddd;
-            text-align: left;
+            min-width: 750px;
         }
 
         th {
-            background: #eaf0f6;
+            background: #f7f9fa;
+            color: #8b97a6;
+            text-transform: uppercase;
+            letter-spacing: .8px;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 14px 13px;
+            text-align: left;
         }
 
-        .flash {
-            background: #e5f5e9;
-            padding: 10px;
-            margin: 8px 0;
-            border-radius: 5px;
+        td {
+            padding: 16px 13px;
+            border-bottom: 1px solid #edf0f2;
+            font-size: 12px;
+            vertical-align: top;
+        }
+
+        tbody tr {
+            transition: background .2s;
+        }
+
+        tbody tr:hover {
+            background: #fbfdfc;
+        }
+
+        .product-name {
+            font-weight: 700;
+            color: var(--text);
+            font-size: 13px;
+        }
+
+        .product-unit {
+            display: inline-block;
+            margin-top: 5px;
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+        .price {
+            font-weight: 700;
+            color: #34435a;
+        }
+
+        .stock-badge {
+            display: inline-block;
+            padding: 6px 9px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .stock-good {
+            background: #e4f8ef;
+            color: #16835f;
+        }
+
+        .stock-low {
+            background: #fff0e8;
+            color: #c65b34;
+        }
+
+        .stock-empty {
+            background: #ffe9eb;
+            color: #c74754;
+        }
+
+        .pack-list {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            margin-bottom: 12px;
+        }
+
+        .pack-item {
+            background: #f5f8f8;
+            padding: 8px 10px;
+            border-radius: 7px;
+            font-size: 10px;
+            color: #526075;
+            line-height: 1.5;
+        }
+
+        .pack-item strong {
+            color: var(--text);
+        }
+
+        .no-packs {
+            color: #a0aab6;
+            font-size: 11px;
+            margin-bottom: 10px;
         }
 
         .pack-form {
-            margin-top: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            min-width: 170px;
         }
 
-        .low-stock {
-            color: #c0392b;
-            font-weight: bold;
+        .pack-form input {
+            width: 100%;
+            padding: 8px 9px;
+            border: 1px solid #e5eaed;
+            border-radius: 7px;
+            font-family: inherit;
+            font-size: 10px;
+            outline: none;
+        }
+
+        .pack-form input:focus {
+            border-color: var(--mint-dark);
+        }
+
+        .pack-form button {
+            background: #e4f8ef;
+            color: #16835f;
+            border: none;
+            padding: 8px;
+            border-radius: 7px;
+            font-family: inherit;
+            font-size: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .pack-form button:hover {
+            background: #c9f0df;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 55px 20px;
+            color: var(--muted);
+        }
+
+        .empty-state .empty-icon {
+            font-size: 35px;
+            margin-bottom: 12px;
+        }
+
+        .empty-state h3 {
+            color: var(--text);
+            font-size: 17px;
+            margin-bottom: 7px;
+        }
+
+        .empty-state p {
+            font-size: 12px;
+        }
+
+        .no-results {
+            display: none;
+            text-align: center;
+            padding: 25px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        /* RESPONSIVE */
+
+        @media (max-width: 1100px) {
+            .main {
+                padding: 28px 25px;
+            }
+
+            .sidebar {
+                width: 215px;
+            }
+
+            .form-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 760px) {
+            .sidebar {
+                width: 68px;
+                padding: 22px 9px;
+            }
+
+            .brand {
+                justify-content: center;
+                padding: 0;
+                margin-bottom: 35px;
+            }
+
+            .brand-name,
+            .nav-label,
+            .nav-links a span:not(.nav-icon),
+            .sidebar-tip,
+            .logout {
+                display: none;
+            }
+
+            .nav-links a {
+                justify-content: center;
+                padding: 14px 5px;
+            }
+
+            .nav-icon {
+                font-size: 19px;
+            }
+
+            .main {
+                padding: 24px 16px;
+            }
+
+            .summary-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .inventory-toolbar {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .toolbar-controls {
+                width: 100%;
+            }
+
+            .search-box {
+                flex: 1;
+            }
+
+            .search-box input {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 500px) {
+            h1 {
+                font-size: 23px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .summary-card {
+                padding: 15px;
+            }
+
+            .summary-card h2 {
+                font-size: 22px;
+            }
+
+            .form-footer {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .primary-btn {
+                width: 100%;
+            }
+
+            .panel {
+                padding: 19px;
+            }
+
+            .toolbar-controls {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 
 <body>
 
-    <h1>DukaanSathi - Shop Inventory</h1>
+<div class="app">
 
-    <a href="/dashboard">Dashboard</a> |
-    <a href="/customers">Customers</a>
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
 
-    {% with messages = get_flashed_messages() %}
-        {% for message in messages %}
-            <p class="flash">{{ message }}</p>
+        <div class="brand">
+            <div class="brand-icon">D</div>
+            <div class="brand-name">Dukaan<span>Sathi</span></div>
+        </div>
+
+        <div class="nav-label">WORKSPACE</div>
+
+        <nav class="nav-links">
+            <a href="{{ url_for('dashboard') }}">
+                <span class="nav-icon">⌂</span>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="{{ url_for('shop_data.inventory') }}" class="active">
+                <span class="nav-icon">▦</span>
+                <span>Inventory</span>
+            </a>
+
+            <a href="{{ url_for('shop_data.sales') }}">
+                <span class="nav-icon">↗</span>
+                <span>Sales</span>
+            </a>
+
+            <a href="{{ url_for('shop_data.customers') }}">
+                <span class="nav-icon">♙</span>
+                <span>Customers</span>
+            </a>
+
+            <a href="{{ url_for('employees.employee_list') }}">
+                <span class="nav-icon">♧</span>
+                <span>Employees</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <div class="sidebar-tip">
+                <strong>💡 Chotu's tip</strong>
+                <p>Keep your stock updated. Chotu can help you track products and identify low-stock items.</p>
+            </div>
+
+            <a href="{{ url_for('auth.logout') }}" class="logout">
+                ↪ &nbsp; Sign out
+            </a>
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+    <main class="main">
+
+        <header class="topbar">
+            <div>
+                <div class="breadcrumb">Workspace / <span>Inventory</span></div>
+                <h1>Shop Inventory</h1>
+                <p class="subtitle">Manage your products, prices and stock levels.</p>
+            </div>
+
+            <div class="user-avatar">
+                {{ current_user.username[0]|upper }}
+            </div>
+        </header>
+
+
+        <!-- FLASH MESSAGES -->
+        {% with messages = get_flashed_messages() %}
+            {% for message in messages %}
+                <div class="flash">✓ &nbsp; {{ message }}</div>
+            {% endfor %}
+        {% endwith %}
+
+
+        <!-- SUMMARY -->
+        {% set low_count = namespace(value=0) %}
+        {% set total_stock = namespace(value=0) %}
+
+        {% for product in products %}
+            {% set total_stock.value = total_stock.value + 1 %}
+
+            {% if product.stock_quantity <= 0 %}
+                {% set low_count.value = low_count.value + 1 %}
+            {% elif product.low_stock_threshold is not none and product.stock_quantity <= product.low_stock_threshold %}
+                {% set low_count.value = low_count.value + 1 %}
+            {% endif %}
         {% endfor %}
-    {% endwith %}
+
+        <section class="summary-grid">
+
+            <div class="summary-card">
+                <p>Total Products</p>
+                <h2>{{ products|length }}</h2>
+                <small>Products in your catalogue</small>
+            </div>
+
+            <div class="summary-card alert">
+                <p>Low Stock Alerts</p>
+                <h2>{{ low_count.value }}</h2>
+                <small>Products that need attention</small>
+            </div>
+
+            <div class="summary-card">
+                <p>Inventory Status</p>
+                <h2>
+                    {% if products|length > 0 and low_count.value == 0 %}
+                        Healthy
+                    {% elif low_count.value > 0 %}
+                        Attention
+                    {% else %}
+                        Empty
+                    {% endif %}
+                </h2>
+                <small>Based on your stock thresholds</small>
+            </div>
+
+        </section>
 
 
-    <!-- ADD PRODUCT -->
+        <!-- ADD PRODUCT FORM -->
+        <section class="panel">
 
-    <div class="section">
+            <div class="panel-heading">
+                <div>
+                    <h2>＋ Add New Product</h2>
+                    <p>Add a product to your shop's inventory.</p>
+                </div>
 
-        <h2>Add New Product</h2>
+                <span class="step-tag">PRODUCT SETUP</span>
+            </div>
 
-        <form method="POST" action="{{ url_for('shop_data.inventory') }}">
+            <form method="POST" action="{{ url_for('shop_data.inventory') }}">
 
-            <input
-                name="name"
-                placeholder="Product name"
-                required
-            >
+                <div class="form-grid">
 
-            <select name="unit" required>
-                <option value="">Select unit</option>
+                    <div class="field">
+                        <label>Product Name</label>
+                        <input
+                            name="name"
+                            placeholder="e.g. Tata Salt"
+                            required
+                        >
+                    </div>
 
-                {% for unit in units %}
-                    <option value="{{ unit }}">{{ unit }}</option>
-                {% endfor %}
-            </select>
+                    <div class="field">
+                        <label>Measurement Unit</label>
+                        <select name="unit" required>
+                            <option value="">Select unit</option>
 
-            <br>
-
-            <label>How much did you buy it for? (₹ per unit)</label>
-            <input
-                name="cost_price"
-                type="number"
-                step="0.01"
-                min="0"
-                placeholder="Bought for"
-                required
-            >
-
-            <label>How much will you sell it for? (₹ per unit)</label>
-            <input
-                name="price"
-                type="number"
-                step="0.01"
-                min="0"
-                placeholder="Sell for"
-                required
-            >
-
-            <br>
-
-            <label>Current stock</label>
-            <input
-                name="stock"
-                type="number"
-                step="0.001"
-                min="0"
-                placeholder="Stock quantity"
-                required
-            >
-
-            <label>Low-stock alert at</label>
-            <input
-                name="low_stock_threshold"
-                type="number"
-                step="0.001"
-                min="0"
-                placeholder="Optional"
-            >
-
-            <br>
-
-            <button type="submit">Add Product</button>
-
-        </form>
-
-    </div>
-
-
-    <!-- PRODUCT LIST -->
-
-    <div class="section">
-
-        <h2>Available Products</h2>
-
-        <table>
-
-            <thead>
-                <tr>
-                    <th>Product</th>
-                    <th>Bought For</th>
-                    <th>Sold For</th>
-                    <th>Stock</th>
-                    <th>Pack Options</th>
-                </tr>
-            </thead>
-
-            <tbody>
-
-                {% for product in products %}
-
-                    <tr>
-
-                        <td>{{ product.name }}</td>
-
-                        <td>
-                            {% if product.cost_price is not none %}
-                                ₹{{ product.cost_price }} / {{ product.unit }}
-                            {% else %}
-                                Not entered
-                            {% endif %}
-                        </td>
-
-                        <td>
-                            ₹{{ product.price }} / {{ product.unit }}
-                        </td>
-
-                        <td>
-                            {% if product.low_stock_threshold is not none
-                                  and product.stock_quantity <= product.low_stock_threshold %}
-                                <span class="low-stock">
-                                    {{ product.stock_quantity }} {{ product.unit }}
-                                    (Low stock!)
-                                </span>
-                            {% else %}
-                                {{ product.stock_quantity }} {{ product.unit }}
-                            {% endif %}
-                        </td>
-
-                        <td>
-
-                            {% for pack in product.packs %}
-
-                                {% if pack.is_active %}
-                                    <p>
-                                        {{ pack.pack_name }} —
-                                        {{ pack.quantity }} {{ product.unit }}
-                                        for ₹{{ pack.price }}
-                                    </p>
-                                {% endif %}
-
-                            {% else %}
-                                <p>No packs added</p>
+                            {% for unit in units %}
+                                <option value="{{ unit }}">{{ unit }}</option>
                             {% endfor %}
+                        </select>
+                    </div>
 
-                            <form
-                                class="pack-form"
-                                method="POST"
-                                action="{{ url_for(
-                                    'shop_data.add_product_pack',
-                                    product_id=product.id
-                                ) }}"
+                    <div class="field">
+                        <label>Purchase Price (₹ per unit)</label>
+                        <input
+                            name="cost_price"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            placeholder="e.g. 20"
+                            required
+                        >
+                    </div>
+
+                    <div class="field">
+                        <label>Selling Price (₹ per unit)</label>
+                        <input
+                            name="price"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            placeholder="e.g. 25"
+                            required
+                        >
+                    </div>
+
+                    <div class="field">
+                        <label>Current Stock</label>
+                        <input
+                            name="stock"
+                            type="number"
+                            step="0.001"
+                            min="0"
+                            placeholder="e.g. 50"
+                            required
+                        >
+                    </div>
+
+                    <div class="field">
+                        <label>Low Stock Alert At</label>
+                        <input
+                            name="low_stock_threshold"
+                            type="number"
+                            step="0.001"
+                            min="0"
+                            placeholder="Optional"
+                        >
+                    </div>
+
+                </div>
+
+                <div class="form-footer">
+                    <p class="form-note">You can add different selling packs after creating the product.</p>
+                    <button type="submit" class="primary-btn">＋ Add Product</button>
+                </div>
+
+            </form>
+
+        </section>
+
+
+        <!-- PRODUCT LIST -->
+        <section class="panel inventory-panel">
+
+            <div class="inventory-toolbar">
+
+                <div>
+                    <h2>Available Products</h2>
+                    <p>View and manage your shop's product catalogue.</p>
+                </div>
+
+                <div class="toolbar-controls">
+
+                    <div class="search-box">
+                        <input
+                            type="search"
+                            id="productSearch"
+                            placeholder="⌕  Search products..."
+                        >
+                    </div>
+
+                    <select id="stockFilter">
+                        <option value="all">All stock</option>
+                        <option value="good">In stock</option>
+                        <option value="low">Low stock</option>
+                        <option value="empty">Out of stock</option>
+                    </select>
+
+                </div>
+
+            </div>
+
+
+            {% if products %}
+
+            <div class="table-wrap">
+
+                <table id="inventoryTable">
+
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Purchase Price</th>
+                            <th>Selling Price</th>
+                            <th>Current Stock</th>
+                            <th>Pack Options</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for product in products %}
+
+                            {% if product.stock_quantity <= 0 %}
+                                {% set stock_status = "empty" %}
+                            {% elif product.low_stock_threshold is not none and product.stock_quantity <= product.low_stock_threshold %}
+                                {% set stock_status = "low" %}
+                            {% else %}
+                                {% set stock_status = "good" %}
+                            {% endif %}
+
+                            <tr
+                                class="product-row"
+                                data-name="{{ product.name|lower }}"
+                                data-stock="{{ stock_status }}"
                             >
 
-                                <input
-                                    name="pack_name"
-                                    placeholder="Pack name (5 kg bag)"
-                                    required
-                                >
+                                <!-- PRODUCT -->
+                                <td>
+                                    <div class="product-name">{{ product.name }}</div>
+                                    <span class="product-unit">Measured in {{ product.unit }}</span>
+                                </td>
 
-                                <input
-                                    name="quantity"
-                                    type="number"
-                                    step="0.001"
-                                    min="0.001"
-                                    placeholder="Quantity"
-                                    required
-                                >
 
-                                <input
-                                    name="price"
-                                    type="number"
-                                    step="0.01"
-                                    min="0"
-                                    placeholder="Pack price ₹"
-                                    required
-                                >
+                                <!-- PURCHASE PRICE -->
+                                <td>
+                                    {% if product.cost_price is not none %}
+                                        <span class="price">₹{{ product.cost_price }}</span>
+                                        <div class="product-unit">per {{ product.unit }}</div>
+                                    {% else %}
+                                        <span class="product-unit">Not entered</span>
+                                    {% endif %}
+                                </td>
 
-                                <button type="submit">Add Pack</button>
 
-                            </form>
+                                <!-- SELLING PRICE -->
+                                <td>
+                                    <span class="price">₹{{ product.price }}</span>
+                                    <div class="product-unit">per {{ product.unit }}</div>
+                                </td>
 
-                        </td>
 
-                    </tr>
+                                <!-- STOCK -->
+                                <td>
+                                    {% if stock_status == "empty" %}
+                                        <span class="stock-badge stock-empty">
+                                            Out of stock
+                                        </span>
+                                    {% elif stock_status == "low" %}
+                                        <span class="stock-badge stock-low">
+                                            ⚠ {{ product.stock_quantity }} {{ product.unit }}
+                                        </span>
+                                    {% else %}
+                                        <span class="stock-badge stock-good">
+                                            {{ product.stock_quantity }} {{ product.unit }}
+                                        </span>
+                                    {% endif %}
+                                </td>
 
-                {% else %}
 
-                    <tr>
-                        <td colspan="5">No products added yet.</td>
-                    </tr>
+                                <!-- PACK OPTIONS -->
+                                <td>
 
-                {% endfor %}
+                                    <div class="pack-list">
 
-            </tbody>
+                                        {% for pack in product.packs %}
 
-        </table>
+                                            {% if pack.is_active %}
+                                                <div class="pack-item">
+                                                    <strong>{{ pack.pack_name }}</strong><br>
+                                                    {{ pack.quantity }} {{ product.unit }}
+                                                    · ₹{{ pack.price }}
+                                                </div>
+                                            {% endif %}
 
-    </div>
+                                        {% else %}
+                                            <p class="no-packs">No packs added yet.</p>
+                                        {% endfor %}
+
+                                    </div>
+
+
+                                    <form
+                                        class="pack-form"
+                                        method="POST"
+                                        action="{{ url_for('shop_data.add_product_pack', product_id=product.id) }}"
+                                    >
+
+                                        <input
+                                            name="pack_name"
+                                            placeholder="Pack name (e.g. 5 kg bag)"
+                                            required
+                                        >
+
+                                        <input
+                                            name="quantity"
+                                            type="number"
+                                            step="0.001"
+                                            min="0.001"
+                                            placeholder="Quantity"
+                                            required
+                                        >
+
+                                        <input
+                                            name="price"
+                                            type="number"
+                                            step="0.01"
+                                            min="0"
+                                            placeholder="Pack price ₹"
+                                            required
+                                        >
+
+                                        <button type="submit">＋ Add Pack</button>
+
+                                    </form>
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+                <div class="no-results" id="noResults">
+                    No products match your search.
+                </div>
+
+            </div>
+
+            {% else %}
+
+                <div class="empty-state">
+                    <div class="empty-icon">📦</div>
+                    <h3>Your inventory is empty</h3>
+                    <p>Add your first product using the form above.</p>
+                </div>
+
+            {% endif %}
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<script>
+    const searchInput = document.getElementById("productSearch");
+    const stockFilter = document.getElementById("stockFilter");
+    const productRows = document.querySelectorAll(".product-row");
+    const noResults = document.getElementById("noResults");
+
+    function filterProducts() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        const selectedStock = stockFilter.value;
+
+        let visibleCount = 0;
+
+        productRows.forEach(row => {
+            const productName = row.dataset.name;
+            const stockStatus = row.dataset.stock;
+
+            const matchesSearch = productName.includes(searchTerm);
+            const matchesStock =
+                selectedStock === "all" || stockStatus === selectedStock;
+
+            if (matchesSearch && matchesStock) {
+                row.style.display = "";
+                visibleCount++;
+            } else {
+                row.style.display = "none";
+            }
+        });
+
+        if (noResults) {
+            noResults.style.display =
+                visibleCount === 0 ? "block" : "none";
+        }
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener("input", filterProducts);
+    }
+
+    if (stockFilter) {
+        stockFilter.addEventListener("change", filterProducts);
+    }
+</script>
 
 </body>
 </html>

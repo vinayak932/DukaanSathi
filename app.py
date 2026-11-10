@@ -35,7 +35,7 @@ def create_app():
 
     @app.route("/")
     def home():
-        return "DukaanSathi AI is running!"
+        return render_template("home.html")
 
     @app.route("/dashboard")
     @login_required

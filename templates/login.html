@@ -1,29 +1,422 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DukaanSathi - Login</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            min-height: 100vh;
+            background: #101b2d;
+            font-family: 'DM Sans', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 25px;
+            color: #172337;
+        }
+
+        .background-glow {
+            position: fixed;
+            width: 450px;
+            height: 450px;
+            border-radius: 50%;
+            background: rgba(112, 224, 181, .10);
+            filter: blur(100px);
+            bottom: -180px;
+            left: -120px;
+            pointer-events: none;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            min-height: 570px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            background: white;
+            border-radius: 22px;
+            overflow: hidden;
+            box-shadow: 0 25px 80px rgba(0,0,0,.25);
+            position: relative;
+            z-index: 1;
+            animation: appear .6s ease;
+        }
+
+        @keyframes appear {
+            from { opacity: 0; transform: translateY(18px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .visual {
+            background: #17263b;
+            color: white;
+            padding: 55px 42px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .visual::before {
+            content: "";
+            position: absolute;
+            width: 280px;
+            height: 280px;
+            border: 1px solid rgba(112,224,181,.2);
+            border-radius: 50%;
+            bottom: -100px;
+            right: -100px;
+        }
+
+        .visual::after {
+            content: "";
+            position: absolute;
+            width: 190px;
+            height: 190px;
+            border: 1px solid rgba(112,224,181,.15);
+            border-radius: 50%;
+            bottom: -55px;
+            right: -55px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 21px;
+            font-weight: 700;
+        }
+
+        .brand-icon {
+            width: 42px;
+            height: 42px;
+            background: #70e0b5;
+            color: #101b2d;
+            border-radius: 13px;
+            display: grid;
+            place-items: center;
+            font-size: 23px;
+        }
+
+        .brand span { color: #70e0b5; }
+
+        .visual-content {
+            margin: 65px 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .visual-content .tag {
+            display: inline-block;
+            color: #70e0b5;
+            background: rgba(112,224,181,.1);
+            border: 1px solid rgba(112,224,181,.2);
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 22px;
+        }
+
+        .visual-content h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 39px;
+            line-height: 1.2;
+            letter-spacing: -1.2px;
+        }
+
+        .visual-content h1 span { color: #70e0b5; }
+
+        .visual-content p {
+            color: #aab6c7;
+            font-size: 13px;
+            line-height: 1.8;
+            margin-top: 18px;
+            max-width: 340px;
+        }
+
+        .visual-footer {
+            color: #8090a5;
+            font-size: 11px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-section {
+            padding: 65px 48px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .welcome {
+            color: #16835f;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            margin-bottom: 12px;
+        }
+
+        .form-section h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 31px;
+            letter-spacing: -.8px;
+        }
+
+        .form-subtitle {
+            color: #8390a2;
+            font-size: 12px;
+            margin-top: 8px;
+            margin-bottom: 30px;
+        }
+
+        .flash {
+            padding: 12px;
+            border-radius: 9px;
+            background: #fff0f0;
+            color: #bd4d58;
+            font-size: 12px;
+            margin-bottom: 16px;
+        }
+
+        .field {
+            margin-bottom: 19px;
+        }
+
+        .field label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            color: #526075;
+            margin-bottom: 8px;
+        }
+
+        .field input {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #e3e9ed;
+            border-radius: 9px;
+            outline: none;
+            background: #fbfcfd;
+            font-family: inherit;
+            font-size: 13px;
+            transition: .2s;
+        }
+
+        .field input:focus {
+            border-color: #36bd91;
+            box-shadow: 0 0 0 3px rgba(54,189,145,.11);
+        }
+
+        .field input::placeholder { color: #aab4c0; }
+
+        .password-wrap { position: relative; }
+
+        .password-wrap input { padding-right: 65px; }
+
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            background: none;
+            color: #36bd91;
+            font-size: 10px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .submit-btn {
+            width: 100%;
+            border: none;
+            border-radius: 9px;
+            padding: 15px;
+            margin-top: 8px;
+            background: #101b2d;
+            color: white;
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .submit-btn:hover {
+            background: #263d5b;
+            transform: translateY(-1px);
+        }
+
+        .bottom-text {
+            margin-top: 26px;
+            text-align: center;
+            color: #8390a2;
+            font-size: 12px;
+        }
+
+        .bottom-text a {
+            color: #16835f;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .bottom-text a:hover { text-decoration: underline; }
+
+        .security-note {
+            margin-top: 30px;
+            padding: 13px;
+            border-radius: 10px;
+            background: #f2faf6;
+            color: #628b78;
+            font-size: 10px;
+            line-height: 1.6;
+        }
+
+        @media(max-width: 750px) {
+            .container { grid-template-columns: 1fr; max-width: 480px; min-height: auto; }
+            .visual { display: none; }
+            .form-section { padding: 48px 28px; }
+        }
+
+        @media(prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+    </style>
 </head>
+
 <body>
 
-    <h1>Welcome Back</h1>
+<div class="background-glow"></div>
 
-    {% with messages = get_flashed_messages() %}
-        {% for message in messages %}
-            <p>{{ message }}</p>
-        {% endfor %}
-    {% endwith %}
+<div class="container">
 
-    <form method="POST">
+    <section class="visual">
 
-        <input type="email" name="email"
-               placeholder="Email" required>
+        <div class="brand">
+            <div class="brand-icon">D</div>
+            <div>Dukaan<span>Sathi</span></div>
+        </div>
 
-        <input type="password" name="password"
-               placeholder="Password" required>
+        <div class="visual-content">
+            <div class="tag">WELCOME BACK</div>
 
-        <button type="submit">Login</button>
+            <h1>
+                Your shop.
+                <span>Under control.</span>
+            </h1>
 
-    </form>
+            <p>
+                Your business assistant is ready.
+                Track sales, manage stock and handle customer
+                khata with Chotu.
+            </p>
+        </div>
+
+        <div class="visual-footer">
+            © 2026 DukaanSathi AI. Built for Indian businesses.
+        </div>
+
+    </section>
+
+
+    <section class="form-section">
+
+        <div class="welcome">DUKAANSATHI AI</div>
+
+        <h2>Welcome back!</h2>
+        <p class="form-subtitle">Sign in to continue managing your shop.</p>
+
+        {% with messages = get_flashed_messages() %}
+            {% for message in messages %}
+                <div class="flash">{{ message }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        <form method="POST" id="loginForm">
+
+            <div class="field">
+                <label for="email">EMAIL ADDRESS</label>
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="you@example.com"
+                    autocomplete="username"
+                    maxlength="250"
+                    required
+                >
+            </div>
+
+            <div class="field">
+                <label for="password">PASSWORD</label>
+
+                <div class="password-wrap">
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Enter your password"
+                        autocomplete="current-password"
+                        required
+                    >
+
+                    <button
+                        type="button"
+                        class="toggle-password"
+                        onclick="togglePassword()"
+                    >SHOW</button>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn">
+                Sign In →
+            </button>
+
+        </form>
+
+        <div class="bottom-text">
+            New to DukaanSathi?
+            <a href="{{ url_for('auth.register') }}">Create an account</a>
+        </div>
+
+        <div class="security-note">
+            🔒 Your shop data and account information are protected
+            by your login credentials. Never share your password.
+        </div>
+
+    </section>
+
+</div>
+
+<script>
+    function togglePassword() {
+        const input = document.getElementById("password");
+        const button = document.querySelector(".toggle-password");
+
+        if (input.type === "password") {
+            input.type = "text";
+            button.textContent = "HIDE";
+        } else {
+            input.type = "password";
+            button.textContent = "SHOW";
+        }
+    }
+</script>
 
 </body>
 </html>

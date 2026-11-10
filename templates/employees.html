@@ -1,111 +1,1012 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>DukaanSathi - Employees</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DukaanSathi - Employee Management</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #101b2d;
+            --mint: #70e0b5;
+            --mint-dark: #36bd91;
+            --bg: #f4f7f8;
+            --text: #172337;
+            --muted: #8390a2;
+            --border: #e8edf0;
+            --red: #dc6871;
+            --shadow: 0 8px 30px rgba(20, 35, 55, .055);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .app {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR */
+
+        .sidebar {
+            width: 245px;
+            background: var(--navy);
+            color: white;
+            padding: 28px 18px;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 0 10px;
+            margin-bottom: 48px;
+        }
+
+        .brand-icon {
+            width: 39px;
+            height: 39px;
+            border-radius: 13px;
+            background: var(--mint);
+            color: var(--navy);
+            display: grid;
+            place-items: center;
+            font-size: 21px;
+            font-weight: 700;
+        }
+
+        .brand-name {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 19px;
+            font-weight: 700;
+        }
+
+        .brand-name span {
+            color: var(--mint);
+        }
+
+        .nav-label {
+            padding: 0 12px;
+            margin-bottom: 13px;
+            color: #718198;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+        }
+
+        .nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #aab6c7;
+            padding: 13px 14px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            font-size: 13px;
+            font-weight: 600;
+            transition: .2s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            background: #26364c;
+            color: var(--mint);
+        }
+
+        .nav-icon {
+            width: 20px;
+            text-align: center;
+            font-size: 17px;
+        }
+
+        .sidebar-bottom {
+            margin-top: auto;
+        }
+
+        .sidebar-tip {
+            padding: 17px;
+            border-radius: 14px;
+            background: #1b2b40;
+            margin-bottom: 20px;
+        }
+
+        .sidebar-tip strong {
+            color: var(--mint);
+            font-size: 12px;
+        }
+
+        .sidebar-tip p {
+            color: #aab6c7;
+            font-size: 11px;
+            line-height: 1.6;
+            margin-top: 7px;
+        }
+
+        .logout {
+            display: block;
+            padding: 12px;
+            color: #aab6c7;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        /* MAIN */
+
+        .main {
+            flex: 1;
+            min-width: 0;
+            padding: 34px 42px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .breadcrumb {
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 7px;
+        }
+
+        .breadcrumb span {
+            color: var(--mint-dark);
+            font-weight: 700;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        h1 {
+            font-size: 28px;
+            letter-spacing: -.8px;
+        }
+
+        .subtitle {
+            color: var(--muted);
+            font-size: 13px;
+            margin-top: 7px;
+        }
+
+        .user-avatar {
+            width: 43px;
+            height: 43px;
+            border-radius: 14px;
+            display: grid;
+            place-items: center;
+            background: #dff8ed;
+            color: #16835f;
+            font-weight: 700;
+        }
+
+        /* FLASH */
+
+        .flash {
+            background: #e4f8ef;
+            border: 1px solid #c7efdc;
+            color: #187a56;
+            padding: 13px 16px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 13px;
+        }
+
+        /* SUMMARY */
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 17px;
+            margin-bottom: 25px;
+        }
+
+        .summary-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 21px;
+            box-shadow: var(--shadow);
+        }
+
+        .summary-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .summary-card p {
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .summary-icon {
+            width: 36px;
+            height: 36px;
+            display: grid;
+            place-items: center;
+            border-radius: 11px;
+            background: #e7f9f1;
+            font-size: 17px;
+        }
+
+        .summary-card h2 {
+            font-size: 27px;
+            margin-top: 13px;
+        }
+
+        .summary-card small {
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .summary-card.inactive h2 {
+            color: var(--red);
+        }
+
+        /* CONTENT */
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: minmax(280px, .8fr) minmax(0, 1.6fr);
+            gap: 21px;
+            align-items: start;
+        }
+
+        .panel {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 17px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .panel-heading {
+            margin-bottom: 22px;
+        }
+
+        .panel-heading h2 {
+            font-size: 18px;
+        }
+
+        .panel-heading p {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 6px;
+            line-height: 1.5;
+        }
+
+        /* FORM */
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 17px;
+        }
+
+        .field label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #526075;
+        }
+
+        .field input {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #e2e8ec;
+            border-radius: 9px;
+            outline: none;
+            font-family: inherit;
+            font-size: 13px;
+            background: #fbfcfd;
+            color: var(--text);
+            transition: .2s;
+        }
+
+        .field input:focus {
+            border-color: var(--mint-dark);
+            box-shadow: 0 0 0 3px rgba(54, 189, 145, .11);
+        }
+
+        .field input::placeholder {
+            color: #aab4c0;
+        }
+
+        .primary-btn {
+            width: 100%;
+            background: var(--navy);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 9px;
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .primary-btn:hover {
+            background: #263d5b;
+            transform: translateY(-1px);
+        }
+
+        .form-note {
+            color: var(--muted);
+            font-size: 10px;
+            line-height: 1.6;
+            margin-top: 13px;
+        }
+
+        /* INFO CARD */
+
+        .info-card {
+            margin-top: 19px;
+            background: var(--navy);
+            border-radius: 14px;
+            padding: 18px;
+            color: white;
+        }
+
+        .info-card span {
+            color: var(--mint);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .info-card p {
+            color: #b3bfd0;
+            font-size: 11px;
+            line-height: 1.7;
+            margin-top: 9px;
+        }
+
+        /* EMPLOYEE TABLE */
+
+        .employee-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 19px;
+        }
+
+        .employee-toolbar h2 {
+            font-size: 18px;
+        }
+
+        .employee-count {
+            color: #16835f;
+            background: #e7f9f1;
+            border-radius: 20px;
+            padding: 6px 10px;
+            font-size: 10px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 11px 13px;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            background: #fbfcfd;
+            font-family: inherit;
+            font-size: 12px;
+            outline: none;
+            margin-bottom: 17px;
+        }
+
+        .search-box input:focus {
+            border-color: var(--mint-dark);
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 530px;
+        }
+
+        th {
+            background: #f7f9fa;
+            color: #8b97a6;
+            text-transform: uppercase;
+            letter-spacing: .8px;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 13px 12px;
+            text-align: left;
+        }
+
+        td {
+            padding: 15px 12px;
+            border-bottom: 1px solid #edf0f2;
+            font-size: 12px;
+        }
+
+        tbody tr:hover {
+            background: #fbfdfc;
+        }
+
+        .employee-name {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+        }
+
+        .employee-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            background: #e7f9f1;
+            color: #16835f;
+            display: grid;
+            place-items: center;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .email {
+            color: #718096;
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 9px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .status.active {
+            color: #16835f;
+            background: #e7f9f1;
+        }
+
+        .status.inactive {
+            color: #c0525d;
+            background: #fff0f0;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .action-form {
+            margin: 0;
+        }
+
+        .action-btn {
+            border: 1px solid #f0c7cb;
+            background: white;
+            color: #c0525d;
+            padding: 8px 11px;
+            border-radius: 7px;
+            font-family: inherit;
+            font-size: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .action-btn:hover {
+            background: #fff0f0;
+        }
+
+        .action-btn.activate {
+            border-color: #bcebd6;
+            color: #16835f;
+        }
+
+        .action-btn.activate:hover {
+            background: #e7f9f1;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 45px 15px;
+            color: var(--muted);
+        }
+
+        .empty-icon {
+            font-size: 36px;
+            margin-bottom: 13px;
+        }
+
+        .empty-state h3 {
+            color: var(--text);
+            font-size: 17px;
+            margin-bottom: 7px;
+        }
+
+        .empty-state p {
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .no-results {
+            display: none;
+            text-align: center;
+            padding: 25px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        /* RESPONSIVE */
+
+        @media (max-width: 1100px) {
+            .main {
+                padding: 28px 25px;
+            }
+
+            .sidebar {
+                width: 215px;
+            }
+
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 760px) {
+            .sidebar {
+                width: 68px;
+                padding: 22px 9px;
+            }
+
+            .brand {
+                justify-content: center;
+                padding: 0;
+                margin-bottom: 35px;
+            }
+
+            .brand-name,
+            .nav-label,
+            .nav-links a span:not(.nav-icon),
+            .sidebar-tip,
+            .logout {
+                display: none;
+            }
+
+            .nav-links a {
+                justify-content: center;
+                padding: 14px 5px;
+            }
+
+            .main {
+                padding: 24px 16px;
+            }
+
+            .summary-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 500px) {
+            h1 {
+                font-size: 23px;
+            }
+
+            .summary-grid {
+                gap: 10px;
+            }
+
+            .summary-card {
+                padding: 15px;
+            }
+
+            .summary-card h2 {
+                font-size: 22px;
+            }
+
+            .panel {
+                padding: 18px;
+            }
+        }
+    </style>
 </head>
+
 <body>
 
-    <h1>Employee Management</h1>
+<div class="app">
 
-    <p>Manage employees authorised to use your shop assistant.</p>
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
 
-    <a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+        <div class="brand">
+            <div class="brand-icon">D</div>
+            <div class="brand-name">Dukaan<span>Sathi</span></div>
+        </div>
 
-    {% with messages = get_flashed_messages() %}
-        {% for message in messages %}
-            <p>{{ message }}</p>
-        {% endfor %}
-    {% endwith %}
+        <div class="nav-label">WORKSPACE</div>
 
-    <hr>
+        <nav class="nav-links">
 
-    <h2>Add New Employee</h2>
+            <a href="{{ url_for('dashboard') }}">
+                <span class="nav-icon">⌂</span>
+                <span>Dashboard</span>
+            </a>
 
-    <form method="POST" action="{{ url_for('employees.add_employee') }}">
+            <a href="{{ url_for('shop_data.inventory') }}">
+                <span class="nav-icon">▦</span>
+                <span>Inventory</span>
+            </a>
 
-        <input
-            type="text"
-            name="username"
-            placeholder="Employee Name"
-            required
-        >
+            <a href="{{ url_for('shop_data.sales') }}">
+                <span class="nav-icon">↗</span>
+                <span>Sales</span>
+            </a>
 
-        <input
-            type="email"
-            name="email"
-            placeholder="Employee Email"
-            required
-        >
+            <a href="{{ url_for('shop_data.customers') }}">
+                <span class="nav-icon">♙</span>
+                <span>Customers</span>
+            </a>
 
-        <input
-            type="password"
-            name="password"
-            placeholder="Temporary Password (minimum 8 characters)"
-            minlength="8"
-            required
-        >
+            <a href="{{ url_for('employees.employee_list') }}" class="active">
+                <span class="nav-icon">♧</span>
+                <span>Employees</span>
+            </a>
 
-        <button type="submit">Add Employee</button>
+        </nav>
 
-    </form>
+        <div class="sidebar-bottom">
 
-    <hr>
+            <div class="sidebar-tip">
+                <strong>💡 Chotu's tip</strong>
+                <p>Only give shop access to people you trust. You can deactivate an employee whenever needed.</p>
+            </div>
 
-    <h2>Your Employees</h2>
+            <a href="{{ url_for('auth.logout') }}" class="logout">
+                ↪ &nbsp; Sign out
+            </a>
 
-    {% if employees %}
+        </div>
 
-        <table border="1" cellpadding="10">
+    </aside>
 
-            <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Status</th>
-                <th>Action</th>
-            </tr>
 
-            {% for employee in employees %}
+    <!-- MAIN -->
+    <main class="main">
 
-                <tr>
-                    <td>{{ employee.username }}</td>
-                    <td>{{ employee.email }}</td>
+        <header class="topbar">
 
-                    <td>
-                        {% if employee.is_active %}
-                            Active
-                        {% else %}
-                            Inactive
-                        {% endif %}
-                    </td>
+            <div>
+                <div class="breadcrumb">Workspace / <span>Employees</span></div>
+                <h1>Employee Management</h1>
+                <p class="subtitle">Manage people authorised to access your shop assistant.</p>
+            </div>
 
-                    <td>
-                        <form
-                            method="POST"
-                            action="{{ url_for(
-                                'employees.toggle_employee',
-                                employee_id=employee.id
-                            ) }}"
-                        >
+            <div class="user-avatar">
+                {{ current_user.username[0]|upper }}
+            </div>
 
-                            {% if employee.is_active %}
-                                <button type="submit">Deactivate</button>
-                            {% else %}
-                                <button type="submit">Activate</button>
-                            {% endif %}
+        </header>
 
-                        </form>
-                    </td>
-                </tr>
 
+        <!-- FLASH MESSAGES -->
+        {% with messages = get_flashed_messages() %}
+            {% for message in messages %}
+                <div class="flash">✓ &nbsp; {{ message }}</div>
             {% endfor %}
+        {% endwith %}
 
-        </table>
 
-    {% else %}
+        <!-- SUMMARY -->
+        {% set active_count = namespace(value=0) %}
 
-        <p>No employees added yet.</p>
+        {% for employee in employees %}
+            {% if employee.is_active %}
+                {% set active_count.value = active_count.value + 1 %}
+            {% endif %}
+        {% endfor %}
 
-    {% endif %}
+        {% set inactive_count = employees|length - active_count.value %}
+
+        <section class="summary-grid">
+
+            <div class="summary-card">
+                <div class="summary-top">
+                    <p>Total Employees</p>
+                    <div class="summary-icon">♧</div>
+                </div>
+                <h2>{{ employees|length }}</h2>
+                <small>Registered employee accounts</small>
+            </div>
+
+            <div class="summary-card">
+                <div class="summary-top">
+                    <p>Active Employees</p>
+                    <div class="summary-icon">✓</div>
+                </div>
+                <h2>{{ active_count.value }}</h2>
+                <small>Currently active accounts</small>
+            </div>
+
+            <div class="summary-card inactive">
+                <div class="summary-top">
+                    <p>Inactive Employees</p>
+                    <div class="summary-icon">⊘</div>
+                </div>
+                <h2>{{ inactive_count }}</h2>
+                <small>Deactivated accounts</small>
+            </div>
+
+        </section>
+
+
+        <div class="content-grid">
+
+            <!-- ADD EMPLOYEE -->
+            <section>
+
+                <div class="panel">
+
+                    <div class="panel-heading">
+                        <h2>＋ Add New Employee</h2>
+                        <p>Create an account for someone authorised to use your shop assistant.</p>
+                    </div>
+
+                    <form method="POST" action="{{ url_for('employees.add_employee') }}">
+
+                        <div class="field">
+                            <label for="username">Employee Name</label>
+                            <input
+                                type="text"
+                                id="username"
+                                name="username"
+                                placeholder="Enter employee name"
+                                required
+                            >
+                        </div>
+
+                        <div class="field">
+                            <label for="email">Email Address</label>
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                placeholder="employee@example.com"
+                                required
+                            >
+                        </div>
+
+                        <div class="field">
+                            <label for="password">Temporary Password</label>
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                placeholder="Minimum 8 characters"
+                                minlength="8"
+                                required
+                            >
+                        </div>
+
+                        <button type="submit" class="primary-btn">
+                            ＋ Create Employee Account
+                        </button>
+
+                        <p class="form-note">
+                            The temporary password must contain at least 8 characters.
+                            Share login credentials securely with the employee.
+                        </p>
+
+                    </form>
+
+                </div>
+
+
+                <div class="info-card">
+                    <span>ACCESS MANAGEMENT</span>
+                    <p>
+                        You can activate or deactivate employee accounts at any time.
+                        Deactivating an account prevents further access according
+                        to your application's authentication rules.
+                    </p>
+                </div>
+
+            </section>
+
+
+            <!-- EMPLOYEE DIRECTORY -->
+            <section class="panel">
+
+                <div class="employee-toolbar">
+                    <h2>Your Employees</h2>
+                    <span class="employee-count">
+                        {{ employees|length }} RECORDS
+                    </span>
+                </div>
+
+                {% if employees %}
+
+                    <div class="search-box">
+                        <input
+                            type="search"
+                            id="employeeSearch"
+                            placeholder="⌕  Search by name or email..."
+                        >
+                    </div>
+
+                    <div class="table-wrap">
+
+                        <table>
+
+                            <thead>
+                                <tr>
+                                    <th>Employee</th>
+                                    <th>Email</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                {% for employee in employees %}
+
+                                <tr
+                                    class="employee-row"
+                                    data-search="{{ (employee.username ~ ' ' ~ employee.email)|lower }}"
+                                >
+
+                                    <td>
+                                        <div class="employee-name">
+                                            <div class="employee-avatar">
+                                                {{ employee.username[0]|upper }}
+                                            </div>
+                                            {{ employee.username }}
+                                        </div>
+                                    </td>
+
+                                    <td class="email">
+                                        {{ employee.email }}
+                                    </td>
+
+                                    <td>
+                                        {% if employee.is_active %}
+                                            <span class="status active">
+                                                <span class="status-dot"></span>
+                                                Active
+                                            </span>
+                                        {% else %}
+                                            <span class="status inactive">
+                                                <span class="status-dot"></span>
+                                                Inactive
+                                            </span>
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+
+                                        <form
+                                            method="POST"
+                                            action="{{ url_for('employees.toggle_employee', employee_id=employee.id) }}"
+                                            class="action-form"
+                                        >
+
+                                            {% if employee.is_active %}
+                                                <button
+                                                    type="submit"
+                                                    class="action-btn"
+                                                >
+                                                    Deactivate
+                                                </button>
+                                            {% else %}
+                                                <button
+                                                    type="submit"
+                                                    class="action-btn activate"
+                                                >
+                                                    Activate
+                                                </button>
+                                            {% endif %}
+
+                                        </form>
+
+                                    </td>
+
+                                </tr>
+
+                                {% endfor %}
+
+                            </tbody>
+
+                        </table>
+
+                        <div class="no-results" id="noResults">
+                            No employees match your search.
+                        </div>
+
+                    </div>
+
+                {% else %}
+
+                    <div class="empty-state">
+                        <div class="empty-icon">👥</div>
+                        <h3>No employees yet</h3>
+                        <p>
+                            You haven't added any employees.
+                            Create your first employee account using the form.
+                        </p>
+                    </div>
+
+                {% endif %}
+
+            </section>
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<script>
+    const searchInput = document.getElementById("employeeSearch");
+    const employeeRows = document.querySelectorAll(".employee-row");
+    const noResults = document.getElementById("noResults");
+
+    if (searchInput) {
+        searchInput.addEventListener("input", function () {
+            const query = this.value.toLowerCase().trim();
+            let visibleCount = 0;
+
+            employeeRows.forEach(row => {
+                const searchableText = row.dataset.search;
+
+                if (searchableText.includes(query)) {
+                    row.style.display = "";
+                    visibleCount++;
+                } else {
+                    row.style.display = "none";
+                }
+            });
+
+            if (noResults) {
+                noResults.style.display =
+                    visibleCount === 0 ? "block" : "none";
+            }
+        });
+    }
+</script>
 
 </body>
 </html>
